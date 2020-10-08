@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Hi!</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- import the webpage's stylesheet -->
+    <!-- link rel="stylesheet" href="/style.css -->
+    <style>
+      .demo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      section {
+        margin: 0 1rem;
+      }
+      img-evolver,
+      mixed-evolver {
+        display: block;
+      }
+      [best="reg"] section:nth-child(1) h1::after {
+        content: "winning";
+        color: green;
+      }
+
+      [best="mixed"] section:nth-child(2) h1::after {
+        content: "winning";
+        color: green;
+      }
+      
+      #caps { display: grid; grid-template-columns: 1fr 1fr 1fr  1fr; }
+      #caps div { margin: 1rem; }
+    </style>
+    <!-- import the webpage's javascript file -->
+    <script src="/offscreen-base-evolver.js" defer></script>
+    <!--script src="/mixed-evolver.js" defer></script-->
+  </head>
+  <body>
+    <main>
+      <label>URL<input id="url" value="https://cdn.glitch.com/1e2b0eb0-562e-4482-9df8-4a15acf7ccc4%2Fmonalisa.jpg?1551302557306"/></label
+      ><button id="go">
+        go
+      </button>
+      <div id="target">
+        
+      </div>
+      <div id="caps">
+        
+      </div>
+    </main>
+    <script>
+      go.onclick = () => {
+          target.innerHTML += `
+            <mixed-evolver src="${url.value}"></mixed-evolver>
+`
+      }
+    
+    </script>
+  </body>
+</html>

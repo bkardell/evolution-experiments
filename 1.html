@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Hi!</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      @keyframes backgroundColorPalette {
+        0% {
+          background: #ee6055;
+        }
+        25% {
+          background: #60d394;
+        }
+        50% {
+          background: #aaf683;
+        }
+        75% {
+          background: #ffd97d;
+        }
+        100% {
+          background: #ff9b85;
+        }
+      }
+      figure:nth-child(1) {
+        animation-name: backgroundColorPalette;
+        animation-duration: 10s;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+        margin: auto;
+      }
+      figure:nth-child(1) > figcaption {
+        margin: 2rem;
+      }
+      
+      .evolver {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      #score {
+      }
+      #welcome > label {
+        display: grid;
+        margin: 1rem 0;
+      }
+      fieldset > label {
+        display: block;
+      }
+      button {
+        width: 85%;
+        display: flex;
+        margin: 1rem auto;
+        justify-content: center;
+      }
+      #score > span { display: block; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="evolver">
+        <figure>
+          <img
+            id="sourceImage"
+            src="https://cdn.glitch.com/1e2b0eb0-562e-4482-9df8-4a15acf7ccc4%2Fmonalisa.jpg?1551302557306"
+          />
+          <figcaption>
+            <div>Goal image<!-- (smooth animation?)--></div>
+            <div>Main thread Speed: <span id="threadSpeed"></span></div>
+          </figcaption>
+        </figure>
+        <div id="welcome">
+          <h1>
+            Image evolution with <span id="offscreen">Offscreen</span>Canvas
+          </h1>
+          <p>
+            Evolving toward a goal image... <a href="https://glitch.com/edit/#!/evolution-experiments?path=README.md%3A1%3A0">Read more about this.</a>
+          </p>
+          <!-- add config options -->
+          <label
+            >URL of alterate goal image<input
+              id="url"
+              value="https://cdn.glitch.com/1e2b0eb0-562e-4482-9df8-4a15acf7ccc4%2Fmonalisa.jpg?1551302557306"
+          /></label>
+          <label title="more genes is slower, but will ultimately be more accurate"
+            >Number of genes (shapes)<input id="numGenes" value="100" 
+          /></label>
+          <fieldset>
+            <legend>
+              Shapes to paint genes as
+            </legend>
+            <label>
+              <input type="radio" checked name="shape" value="rectangle" />
+              Rectangles
+            </label>
+            <label>
+              <input type="radio" name="shape" value="triangle" />
+              Triangles
+            </label>
+            <label>
+              <input type="radio" name="shape" value="circle" />
+              Circles
+            </label>
+            <label>
+              <input type="radio" name="shape" value="ellipse" />
+              Ellipses
+            </label>
+          </fieldset>
+
+          <button id="go">
+            Start
+          </button>
+        </div>
+
+        <figure id="target" hidden>
+          <canvas id="destCanvas"></canvas>
+          <figcaption id="score">
+            <span> generation: <span id="genEl"></span> </span>
+            <span> fitness: <span id="computedFitnessEl"></span> </span>
+            <span>
+              achieved in generation: <span id="achievedInEl"></span>
+            </span>
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+    <script type="module">
+      if (!window.OffscreenCanvas) {
+        offscreen.style.textDecoration = "line-through";
+        offscreen.title =
+          "It seems your browser doesn't yet support OffscreenCanvas, we'll be working on the main thread";
+      }
+
+      let promiseImage = url => {
+        return new Promise((resolve, reject) => {
+          let img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => {
+            resolve(img);
+          };
+          img.onerror = e => {
+            reject(e);
+          };
+          img.src = url;
+        });
+      };
+
+    let now
+    let before=Date.now();
+    let fps=0;
+    requestAnimationFrame(
+        function loop(){
+            now=Date.now();
+            fps=Math.round(1000/(now-before));
+            before=now;
+            requestAnimationFrame(loop);
+            threadSpeed.innerText = fps
+        }
+     );
+      let bestFitness = Number.MAX_SAFE_INTEGER;
+      let bestGeneration = 0;
+      let updateDOM = o => {
+        if (o.computedFitness < bestFitness) {
+          bestFitness = o.computedFitness;
+          bestGeneration = o.generation;
+        }
+        genEl.innerText = o.generation;
+        computedFitnessEl.innerText = o.computedFitness;
+        achievedInEl.innerText = bestGeneration;
+      };
+
+      go.onclick = () => {
+        let shape = [...document.querySelectorAll('[name="shape"]')].filter(
+          el => el.checked
+        )[0].value;
+
+        welcome.setAttribute("hidden", "hidden");
+        target.removeAttribute("hidden");
+        sourceImage.src = url.value;
+        start(url.value, `${shape}-gene-painter.js`, numGenes.value);
+      };
+
+      let start = async function(goalURL, painterModule, genesMin) {
+        let imgPromise = promiseImage(goalURL);
+
+        if (window.OffscreenCanvas) {
+          let worker = new Worker("evo-pop-worker.js", { type: "module" });
+          let c = destCanvas.transferControlToOffscreen();
+
+          let img = await createImageBitmap(await imgPromise);
+          worker.postMessage(
+            {
+              goal: img,
+              painterModule: painterModule,
+              canvas: c,
+              genesMin: genesMin
+            },
+            [img, c]
+          );
+
+          worker.onmessage = evt => {
+            updateDOM(evt.data);
+          };
+        } else {
+          let create = (await import("/evo-pop-worker.js")).default;
+          let x = create(updateDOM);
+          x({
+            data: {
+              goal: await imgPromise,
+              painterModule: painterModule,
+              canvas: destCanvas,
+              genesMin: genesMin
+            }
+          });
+        }
+      };
+    </script>
+  </body>
+</html>
