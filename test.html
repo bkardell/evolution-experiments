@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Hi!</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      .evolver {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      #score {
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="evolver">
+        <figure>
+          <img
+            id="sourceImage"
+            src="https://cdn.glitch.com/1e2b0eb0-562e-4482-9df8-4a15acf7ccc4%2Fmonalisa.jpg?1551302557306"
+          />
+          <figcaption>Goal image</figcaption>
+        </figure>
+        <figure>
+          <canvas id="destCanvas"></canvas>
+          <figcaption id="score"></figcaption>
+        </figure>
+      </section>
+    </main>
+    <script type="module">
+      
+
+      let promiseImage = url => {
+        return new Promise((resolve, reject) => {
+          let img = new Image();
+          img.crossOrigin = "Anonymous";
+          img.onload = () => {
+            resolve(img);
+          };
+          img.onerror = e => {
+            reject(e);
+          };
+          img.src = url;
+        });
+      };
+      /*
+      promiseImage(sourceImage.getAttribute('src')).then((img) => {
+        let populationSize = 10
+        let population = []
+        for(var i=0; i<populationSize; i++) {
+          let evoCanvas = new EvoCanvas({goalImage: img, genePainter: rectanglePainter})
+          evoCanvas.paint();
+          score.innerHTML+= `<div>${i} - fitness ${evoCanvas.fitness}</div>`
+          
+          evoCanvas = evoCanvas.another(evoCanvas)
+          evoCanvas.paint()
+          score.innerHTML+= `<div>${i} - fitness ${evoCanvas.fitness}</div>`
+          
+          //console.log(evoCanvas.another())
+        }
+        
+        //evoCanvas.renderTo(destCanvas)
+      })
+*/
+      /*
+      This program just tests whether things are not getting worse...
+      It's hella easy to mess up
+      
+      promiseImage(sourceImage.getAttribute('src')).then((img) => {
+        let evoPop = new EvoCanvasPopulation({
+          goalImage: img, 
+          genePainter: rectanglePainter, 
+          callback: (o) => {
+            console.log('got', o.fittest.computedFitness)
+          }})
+        
+        for(var i=0;i<10;i++) {
+          evoPop.nextGeneration()
+        }
+      })*/
+
+      /* last
+      promiseImage(sourceImage.getAttribute("src")).then(img => {
+        let evoPop = new EvoCanvasPopulation({
+          goalImage: img,
+          genePainter: circlePainter,
+          genesMin: 100,
+          callback: o => {
+            console.log("got ", o);
+            score.innerHTML = `<span>
+                generation: ${o.generation} 
+              </span>
+              <span>
+                fitness: ${o.fittest.computedFitness}
+              </span>`;
+            o.fittest.renderTo(destCanvas);
+          }
+        });
+
+        let run = () => {
+          evoPop.nextGeneration();
+          requestAnimationFrame(run)
+        }
+        run()
+        
+      }); */
+
+      let updateDOM = o => {
+        score.innerHTML = `<span>
+                  generation: ${o.generation} 
+                </span>
+                <span>
+                  fitness: ${o.computedFitness}
+                </span>`;
+      };
+
+      (async function() {
+        let imgPromise = promiseImage(sourceImage.getAttribute("src"));
+
+        if (false && window.OffscreenCanvas) {
+          let worker = new Worker("evo-pop-worker.js", { type: "module" });
+          let c = destCanvas.transferControlToOffscreen();
+
+          let img = createImageBitmap(await imgPromise);
+          worker.postMessage(
+            {
+              goal: img,
+              painterModule: "triangle-gene-painter.js",
+              canvas: c
+            },
+            [c, img]
+          );
+
+          worker.onmessage = (evt) => {
+           updateDOM(evt.data) 
+          };
+        } else {
+          let create = (await import("/evo-pop-worker.js")).default;
+          let x = create(updateDOM)
+          x({data: {
+              goal: await imgPromise,
+              painterModule: "rectangle-gene-painter.js",
+              canvas: destCanvas
+            }});
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+/* CSS files add styling rules to your content */
+
+body {
+  font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+  margin: 2em;
+  margin-top: 4rem;
+}
+
+
+
+h1 {
+  font-style: italic;
+  color: #373fff;
+}
+
+main canvas {
+  border: 1px solid black;
+  display: inline-block;
+}
+
+main img {
+  display: none;
+}
+
+section {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.best-genes {
+  max-width: 100%;
+  overflow: hidden;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.stats {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}

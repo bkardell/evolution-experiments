@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Hi!</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- import the webpage's stylesheet -->
+    <!-- link rel="stylesheet" href="/style.css -->
+    <style>
+      .demo { display: grid; grid-template-columns: 1fr 1fr; }
+      section { margin: 0 1rem; }
+      img-evolver, mixed-evolver { display: block; }
+      [best="reg"] section:nth-child(1) h1::after {
+        content: 'winning';
+        color: green;  
+      }
+
+      [best="mixed"] section:nth-child(2) h1::after {
+        content: 'winning';
+        color: green;  
+      }
+    </style>
+    <!-- import the webpage's javascript file -->
+    <script src="/base-evolver.js" defer></script>
+    
+    <script src="/offscreen-base-evolver.js" defer></script>
+    <!--
+    <script src="/mixed-evolver.js" defer></script> -->
+    
+  </head>  
+  <body>
+    <main>
+      <h1>
+        Fun with genetics, custom elements and Glitch.
+      </h1>
+      <p>
+        See the <a href="https://glitch.com/edit/#!/safe-ear?path=README.md"> to learn more about what 
+        this is.</a>
+      </p>
+      <div class="demo">
+        <section>
+            <h1>
+              Asexual (base) evolver
+            </h1>
+            <img-evolver src="https://cdn.glitch.com/1e2b0eb0-562e-4482-9df8-4a15acf7ccc4%2Fmonalisa.jpg?1551302557306"></img-evolver>
+          </section>
+          <section>
+            <h1>
+              Mixed reproduction strategy
+            </h1>
+            <mixed-evolver src="https://cdn.glitch.com/1e2b0eb0-562e-4482-9df8-4a15acf7ccc4%2Fmonalisa.jpg?1551302557306"></mixed-evolver>
+          </section>
+      </div>
+      
+    </main>
+    <script>
+    setInterval(() => {
+      let reg = document.querySelector('img-evolver')
+      let mixed = document.querySelector('mixed-evolver')
+      if (reg.containers) {
+        let a = parseInt(reg.containers.fitness.innerText.replaceAll(',', ''), 10)
+        let b = parseInt(mixed.containers.fitness.innerText.replaceAll(',', ''), 10)
+        // the numbers are unsigned, but negative
+        document.body.setAttribute("best", (a < b) ? "reg" : "mixed")
+      }
+      
+    }, 500)
+    </script>
+  </body>
+</html>
