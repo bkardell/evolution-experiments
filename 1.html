@@ -186,7 +186,7 @@
         let imgPromise = promiseImage(goalURL);
 
         if (window.OffscreenCanvas) {
-          let worker = new Worker("evo-pop-worker.js", { type: "module" });
+          let worker = new Worker("evo-pop-worker.js");
           let c = destCanvas.transferControlToOffscreen();
 
           let img = await createImageBitmap(await imgPromise);
