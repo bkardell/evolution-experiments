@@ -1,5 +1,5 @@
 // Note: Dont use fat arrow!
-export default function(x, y, radius, four, r, g, b, a) {
+function painter(x, y, radius, four, r, g, b, a) {
   let startAngle = 0; // Starting point on circle
   let endAngle = 360; //Math.PI + (Math.PI * four) / 2; // End point on circle
 

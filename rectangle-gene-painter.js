@@ -1,4 +1,4 @@
-export default function(top, right, bottom, left, r, g, b, a) {
+function painter(top, right, bottom, left, r, g, b, a) {
   this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
   this.ctx.fillRect(
     this.xUnit * left,
@@ -6,4 +6,4 @@ export default function(top, right, bottom, left, r, g, b, a) {
     this.xUnit * right - this.xUnit * left,
     this.yUnit * bottom - this.yUnit * top
   );
-};
+};   

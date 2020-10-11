@@ -125,6 +125,7 @@
       </section>
     </main>
     <script type="module">
+
       if (!window.OffscreenCanvas) {
         offscreen.style.textDecoration = "line-through";
         offscreen.title =
@@ -145,6 +146,7 @@
         });
       };
 
+    let threadSpeed = document.querySelector('#threadSpeed')
     let now
     let before=Date.now();
     let fps=0;
@@ -202,7 +204,7 @@
             updateDOM(evt.data);
           };
         } else {
-          let create = (await import("/evo-pop-worker.js")).default;
+          let create = (await import("/evo-pop-workerless.js")).default;
           let x = create(updateDOM);
           x({
             data: {

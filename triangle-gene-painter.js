@@ -1,4 +1,4 @@
-export default function(one, two, three, four, r, g, b, a) {
+function painter(one, two, three, four, r, g, b, a) {
   this.ctx.beginPath();
   this.ctx.moveTo(this.xUnit * one, this.yUnit * two);
   this.ctx.lineTo((this.xUnit * 255) - (this.xUnit * three), this.yUnit * four);

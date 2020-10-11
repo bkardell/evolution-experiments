@@ -1,12 +1,12 @@
-import { EvoCanvasPopulation } from "./evo-population.js";
+
+importScripts('./bundle.js')
     
 let create = (communicator) => {
   return async function(e) {
-    let painter = await import(`/${e.data.painterModule || 'rectangle-gene-painter.js'}`);
-
+    importScripts(`/${e.data.painterModule || 'rectangle-gene-painter.js'}`);
     let evoPop = new EvoCanvasPopulation({
       goalImage: e.data.goal,
-      genePainter: painter.default,
+      genePainter: painter,
       genesMin: e.data.genesMin || 100,
       callback: o => {
         o.fittest.renderTo(e.data.canvas);
@@ -23,10 +23,9 @@ let create = (communicator) => {
 
 }
 
-if (self) {
+if (typeof self !== 'undefined') {
   self.onmessage = (evt) => {
     create(postMessage)(evt)
   }
 }
-
-export default create;
+ 
